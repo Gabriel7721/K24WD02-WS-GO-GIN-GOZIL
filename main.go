@@ -17,6 +17,6 @@ func main() {
 	})
 
 	port := common.GetEnv("PORT")
-	fmt.Println("Server is running at http://localhost:" + port)
+	fmt.Println("Server is running at http://localhost" + port)
 	r.Run(port)
 }
