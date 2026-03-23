@@ -50,3 +50,36 @@ func (r *Repository) AcceptRequest(requestID bson.ObjectID) error {
 	_, err = r.Friends.InsertOne(context.TODO(), friend)
 	return err
 }
+
+// NOTE: Happy Homeworks
+func (r *Repository) ListFriends(userID bson.ObjectID) ([]bson.ObjectID, error) {
+	cursor, err := r.Friends.Find(context.TODO(), bson.M{
+		"$or": []bson.M{
+			{"user1": userID},
+			{"user2": userID},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.TODO())
+
+	var ids []bson.ObjectID
+	for cursor.Next(context.TODO()) {
+		var f Friend
+		if err := cursor.Decode(&f); err == nil {
+			if f.User1 == userID {
+				ids = append(ids, f.User2)
+			} else {
+				ids = append(ids, f.User1)
+			}
+		}
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return ids, nil
+
+}

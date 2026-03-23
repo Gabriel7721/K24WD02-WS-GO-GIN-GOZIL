@@ -5,6 +5,7 @@ import (
 
 	"ws/src/auth"
 	"ws/src/common"
+	"ws/src/friend"
 	"ws/src/user"
 
 	"github.com/gin-gonic/gin"
@@ -12,9 +13,12 @@ import (
 
 func main() {
 	common.LoadEnv()
-	userRepo := user.NewRepository(common.MongoConnect())
+	db := common.MongoConnect()
+	userRepo := user.NewRepository(db)
+	friendRepo := friend.NewRepository(db)
 	userController := user.NewController(userRepo)
 	authController := auth.NewController(userRepo)
+	friendController := friend.NewController(friendRepo)
 
 	r := gin.Default()
 
@@ -23,6 +27,8 @@ func main() {
 	})
 	r.POST("/api/register", userController.Register)
 	r.POST("/api/login", authController.Login)
+	r.POST("/api/friend/request", auth.JWTMiddleware(), friendController.SendRequest)
+	r.POST("/api/friend/accept", auth.JWTMiddleware(), friendController.AcceptRequest)
 
 	port := common.GetEnv("PORT")
 	fmt.Println("Server is running at http://localhost" + port)
