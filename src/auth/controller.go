@@ -16,7 +16,7 @@ func NewController(repo *user.Repository) *UserController {
 	return &UserController{UserRepo: repo}
 }
 
-func (ctrl *UserController) method(c *gin.Context) {
+func (ctrl *UserController) Login(c *gin.Context) {
 	var input LoginInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"ws/src/auth"
 	"ws/src/common"
 	"ws/src/user"
 
@@ -11,8 +12,9 @@ import (
 
 func main() {
 	common.LoadEnv()
-
-	userController := user.NewController(user.NewRepository(common.MongoConnect()))
+	userRepo := user.NewRepository(common.MongoConnect())
+	userController := user.NewController(userRepo)
+	authController := auth.NewController(userRepo)
 
 	r := gin.Default()
 
@@ -20,6 +22,7 @@ func main() {
 		ctx.String(200, "Welcome to my chat server version 0.0.0.1")
 	})
 	r.POST("/api/register", userController.Register)
+	r.POST("/api/login", authController.Login)
 
 	port := common.GetEnv("PORT")
 	fmt.Println("Server is running at http://localhost" + port)
