@@ -2,6 +2,7 @@ package user
 
 import (
 	"net/http"
+	"ws/src/auth"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,6 +22,9 @@ func (ctrl Controller) Register(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON body"})
 		return
 	}
+
+	hashed, _ := auth.HashPassword(input.Password)
+	input.Password = hashed
 
 	// Call Repo
 	if err := ctrl.Repo.Create(&input); err != nil {
