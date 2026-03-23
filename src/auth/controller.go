@@ -1,6 +1,12 @@
 package auth
 
-import "ws/src/user"
+import (
+	"net/http"
+	"ws/src/common"
+	"ws/src/user"
+
+	"github.com/gin-gonic/gin"
+)
 
 type UserController struct {
 	UserRepo *user.Repository
@@ -8,4 +14,34 @@ type UserController struct {
 
 func NewController(repo *user.Repository) *UserController {
 	return &UserController{UserRepo: repo}
+}
+
+func (ctrl *UserController) method(c *gin.Context) {
+	var input LoginInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	u := ctrl.UserRepo.FindByEmail(input.Email)
+	if u == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Email"})
+		return
+	}
+
+	if !common.CheckPassword(u.Password, input.Password) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Password"})
+		return
+	}
+
+	token, err := GenerateToken(u.ID.Hex())
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to create token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"token": token,
+	})
 }
