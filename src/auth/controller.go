@@ -24,8 +24,8 @@ func (ctrl *UserController) Login(c *gin.Context) {
 		return
 	}
 
-	u := ctrl.UserRepo.FindByEmail(input.Email)
-	if u == nil {
+	u, err := ctrl.UserRepo.FindByEmail(input.Email)
+	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Email"})
 		return
 	}
@@ -37,7 +37,7 @@ func (ctrl *UserController) Login(c *gin.Context) {
 
 	token, err := GenerateToken(u.ID.Hex())
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to create token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create token"})
 		return
 	}
 

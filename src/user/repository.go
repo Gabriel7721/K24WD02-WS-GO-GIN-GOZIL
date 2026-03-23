@@ -31,10 +31,10 @@ func (r *Repository) Create(user *User) error {
 	return err
 }
 
-func (r *Repository) FindByEmail(email string) *User {
+func (r *Repository) FindByEmail(email string) (*User, error) {
 	var user User
-	r.Collection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
-	return &user
+	err := r.Collection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
+	return &user, err
 }
 
 func CreateUserIndexes(collection *mongo.Collection) error {
