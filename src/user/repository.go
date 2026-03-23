@@ -24,9 +24,11 @@ func NewRepository(db *mongo.Database) *Repository {
 	}
 }
 
-func (r *Repository) Create(user *User) {
+func (r *Repository) Create(user *User) error {
 	user.CreatedAt = time.Now()
-	r.Collection.InsertOne(context.TODO(), user)
+
+	_, err := r.Collection.InsertOne(context.TODO(), user)
+	return err
 }
 
 func (r *Repository) FindByEmail(email string) *User {

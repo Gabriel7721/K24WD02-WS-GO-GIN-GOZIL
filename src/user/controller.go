@@ -22,6 +22,11 @@ func (ctrl Controller) Register(ctx *gin.Context) {
 		return
 	}
 
-	ctrl.Repo.Create(&input)
+	// Call Repo
+	if err := ctrl.Repo.Create(&input); err != nil {
+		ctx.JSON(http.StatusConflict, gin.H{"error": "username or email existed"})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{"message": "Register success!"})
 }
