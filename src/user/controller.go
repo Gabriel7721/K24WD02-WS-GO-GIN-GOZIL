@@ -2,7 +2,7 @@ package user
 
 import (
 	"net/http"
-	"ws/src/auth"
+	"ws/src/common"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,7 +23,7 @@ func (ctrl Controller) Register(ctx *gin.Context) {
 		return
 	}
 
-	hashed, _ := auth.HashPassword(input.Password)
+	hashed, _ := common.HashPassword(input.Password)
 	input.Password = hashed
 
 	// Call Repo
