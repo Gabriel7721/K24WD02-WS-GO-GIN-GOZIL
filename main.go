@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"ws/src/auth"
+	"ws/src/chat"
 	"ws/src/common"
 	"ws/src/friend"
 	"ws/src/user"
@@ -20,6 +21,8 @@ func main() {
 	authController := auth.NewController(userRepo)
 	friendController := friend.NewController(friendRepo)
 
+	go chat.WS.Run()
+
 	r := gin.Default()
 
 	r.GET("/", func(ctx *gin.Context) {
@@ -29,6 +32,7 @@ func main() {
 	r.POST("/api/login", authController.Login)
 	r.POST("/api/friend/request", auth.JWTMiddleware(), friendController.SendRequest)
 	r.POST("/api/friend/accept", auth.JWTMiddleware(), friendController.AcceptRequest)
+	r.GET("/ws", chat.ServerWS)
 
 	port := common.GetEnv("PORT")
 	fmt.Println("Server is running at http://localhost" + port)
