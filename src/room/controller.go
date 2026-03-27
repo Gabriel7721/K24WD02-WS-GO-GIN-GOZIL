@@ -30,5 +30,6 @@ func (ctrl *Controller) Create(c *gin.Context) {
 			"error": err.Error(),
 		})
 	}
+
 	c.JSON(http.StatusOK, room)
 }
