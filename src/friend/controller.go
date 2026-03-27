@@ -53,5 +53,15 @@ func (ctrl *Controller) AcceptRequest(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Can not Accept friend request"})
 		return
 	}
+
+	req, err := ctrl.Repo.GetRequestByID(requestObjID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "User ID not found",
+		})
+		return
+	}
+	notify.SendToUser(req.FromUserID.Hex(), "Lời mời kết bạn đã được xác nhận !")
+
 	c.JSON(http.StatusOK, gin.H{"message": "Friend Request Accepted !"})
 }

@@ -83,3 +83,9 @@ func (r *Repository) ListFriends(userID bson.ObjectID) ([]bson.ObjectID, error) 
 	return ids, nil
 
 }
+
+func (r *Repository) GetRequestByID(id bson.ObjectID) (*FriendRequest, error) {
+	var req FriendRequest
+	r.FriendRequest.FindOne(context.TODO(), bson.M{"_id": id})
+	return &req, nil
+}
