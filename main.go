@@ -7,6 +7,7 @@ import (
 	"ws/src/chat"
 	"ws/src/common"
 	"ws/src/friend"
+	"ws/src/notify"
 	"ws/src/room"
 	"ws/src/user"
 
@@ -26,6 +27,7 @@ func main() {
 	roomController := room.NewController(roomRepo)
 
 	go chat.WS.Run()
+	go notify.NotifyWS.Run()
 
 	r := gin.Default()
 
@@ -39,6 +41,7 @@ func main() {
 	r.POST("/api/room", auth.JWTMiddleware(), roomController.Create)
 
 	r.GET("/ws", chat.ServerWS)
+	r.GET("/ws/notify", notify.ServerWS)
 
 	port := common.GetEnv("PORT")
 	fmt.Println("Server is running at http://localhost" + port)
