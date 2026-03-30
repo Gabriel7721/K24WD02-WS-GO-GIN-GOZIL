@@ -2,15 +2,18 @@ package friend
 
 import (
 	"net/http"
+
 	"ws/src/auth"
 	"ws/src/notify"
+	"ws/src/user"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type Controller struct {
-	Repo *Repository
+	Repo     *Repository
+	UserRepo *user.Repository
 }
 
 func NewController(r *Repository) *Controller {
@@ -65,4 +68,28 @@ func (ctrl *Controller) AcceptRequest(c *gin.Context) {
 	notify.SendToUser(req.FromUserID.Hex(), "Lời mời kết bạn đã được xác nhận !")
 
 	c.JSON(http.StatusOK, gin.H{"message": "Friend Request Accepted !"})
+}
+
+func (ctrl *Controller) ListMyFriend(c *gin.Context) {
+	userIDStr := c.MustGet(auth.UserIDKey).(string)
+	userID, _ := bson.ObjectIDFromHex(userIDStr)
+	friendIDs, _ := ctrl.Repo.ListFriends(userID)
+	if len(friendIDs) == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"friends": []gin.H{},
+		})
+		return
+	}
+	users := ctrl.UserRepo.FindManyByIDs(friendIDs)
+	result := make([]gin.H, 0, len(users))
+	for _, u := range users {
+		result = append(result, gin.H{
+			"id":       u.ID.Hex(),
+			"username": u.Username,
+			"email":    u.Email,
+		})
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"friends": result,
+	})
 }
