@@ -57,6 +57,21 @@ func ServerWS(c *gin.Context) {
 func (c *Client) ReadPump() {
 	chatRepo := NewRepository(common.MongoConnect())
 	defer func() {
+		// 1. Delete user from room present
+		room.RoomMembers.Leave(c.RoomID, c.UserID)
+		// 2. Broadcast news to all of clients inside the room
+		leaveMsg, _ := json.Marshal(map[string]any{
+			"type":    "leave",
+			"room_id": c.RoomID,
+			"user_id": c.UserID,
+			"users":   room.RoomMembers.GetUsers(c.RoomID),
+		})
+
+		WS.Broadcast <- &MessagePayload{
+			RoomID:  c.RoomID,
+			Message: leaveMsg,
+		}
+
 		WS.UnRegister <- c
 		c.Conn.Close()
 	}()
