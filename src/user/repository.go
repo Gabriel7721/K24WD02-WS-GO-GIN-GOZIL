@@ -54,3 +54,17 @@ func CreateUserIndexes(collection *mongo.Collection) error {
 	fmt.Println("Created Indexes:", names)
 	return nil
 }
+
+func (r *Repository) FindByID(id bson.ObjectID) *User {
+	var u User
+	r.Collection.FindOne(context.TODO(), bson.M{"_id": id})
+	return &u
+}
+
+func (r *Repository) FindManyByIDs(ids []bson.ObjectID) []User {
+	cursor, _ := r.Collection.Find(context.TODO(), bson.M{"_id": bson.M{"$in": ids}})
+	defer cursor.Close(context.TODO())
+	var users []User
+	cursor.All(context.TODO(), &users)
+	return users
+}

@@ -104,8 +104,12 @@ function connectSignaling() {
     log("Vui lòng nhập ID của User 01");
     return;
   }
+  const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
   const wsUrl =
-    "ws://localhost:9999/ws/signaling?user=" + encodeURIComponent(myId);
+    protocol +
+    window.location.host +
+    "/ws/signaling?user=" +
+    encodeURIComponent(myId);
 
   ws = new WebSocket(wsUrl);
   ws.onopen = function () {
@@ -116,7 +120,7 @@ function connectSignaling() {
 
     const msg = JSON.parse(event.data);
 
-    const fromUser = msg.from;
+    const fromUser = msg.from_user;
     const type = msg.type;
     const data = msg.data;
 
@@ -144,10 +148,10 @@ function connectSignaling() {
       sendSignal(fromUser, "answer", peerConnection.localDescription);
       log("Đã gửi answer về " + fromUser);
     } else if (type === "answer") {
+      log("Nhận answer từ " + fromUser);
       await peerConnection.setRemoteDescription(
         new RTCSessionDescription(data),
       );
-      log("Nhận answer từ " + fromUser);
     } else if (type === "ice") {
       log("Nhận ICE từ " + fromUser);
       if (data && data.candidate) {
