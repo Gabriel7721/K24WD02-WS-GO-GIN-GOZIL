@@ -65,10 +65,20 @@ function createPeerConnection() {
 }
 async function startCamera() {
   try {
-    log(
-      `Trình duyệt hiện tại không hỗ trợ camera trong ngữ cảnh này.
-Hãy dùng HTTPS hoặc localhost.`,
-    );
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      log(
+        `Trình duyệt hiện tại không hỗ trợ camera trong ngữ cảnh này.
+            Hãy dùng HTTPS hoặc localhost.`,
+      );
+      return;
+    }
+
+    localStream = await avigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+
+    localVideo.srcObject = localStream;
     log("Đã mở camera/micro");
   } catch (error) {
     log("Lỗi mở camera: " + error.message);
