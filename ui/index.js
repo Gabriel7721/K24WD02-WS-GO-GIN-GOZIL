@@ -198,6 +198,8 @@ async function makeCall() {
 }
 function hangUp() {
   if (peerConnection) {
+    peerConnection.close();
+    peerConnection = null;
   }
   log("Đã ngắt cuộc gọi");
 }
