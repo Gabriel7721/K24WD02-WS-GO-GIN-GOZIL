@@ -17,7 +17,7 @@ const logBox = $("log");
 
 // log("Connection success!") => <div>Connection success!</div>
 function log(message) {
-  logBox.textContent = message + "\n";
+  logBox.textContent += message + "\n";
 }
 function sendSignal(toUserId, type, data) {
   if (!ws || ws.readyState !== WebSocket.OPEN) {
@@ -120,7 +120,7 @@ function connectSignaling() {
 
     const msg = JSON.parse(event.data);
 
-    const fromUser = msg.from_user;
+    const fromUser = msg.from;
     const type = msg.type;
     const data = msg.data;
 
@@ -157,7 +157,7 @@ function connectSignaling() {
       if (data && data.candidate) {
         try {
           await peerConnection.addIceCandidate(
-            new RTCSessionDescription(data.candidate),
+            new RTCIceCandidate(data.candidate),
           );
         } catch (err) {
           log("Lỗi xảy ra khi Add Candidate từ ICE" + err.message);

@@ -57,7 +57,7 @@ func CreateUserIndexes(collection *mongo.Collection) error {
 
 func (r *Repository) FindByID(id bson.ObjectID) *User {
 	var u User
-	r.Collection.FindOne(context.TODO(), bson.M{"_id": id})
+	r.Collection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&u)
 	return &u
 }
 

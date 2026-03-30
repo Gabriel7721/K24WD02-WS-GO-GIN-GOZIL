@@ -43,11 +43,11 @@ func main() {
 	r.POST("/api/register", userController.Register)
 
 	r.POST("/api/login", authController.Login)
-	r.POST("/api/myprofile", auth.JWTMiddleware(), authController.MyProfile)
+	r.GET("/api/myprofile", auth.JWTMiddleware(), authController.MyProfile)
 
 	r.POST("/api/friend/request", auth.JWTMiddleware(), friendController.SendRequest)
 	r.POST("/api/friend/accept", auth.JWTMiddleware(), friendController.AcceptRequest)
-	r.POST("/api/friends", auth.JWTMiddleware(), friendController.ListMyFriend)
+	r.GET("/api/friends", auth.JWTMiddleware(), friendController.ListMyFriend)
 
 	r.POST("/api/room", auth.JWTMiddleware(), roomController.Create)
 
