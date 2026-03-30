@@ -84,11 +84,19 @@ async function startCamera() {
     log("Lỗi mở camera: " + error.message);
   }
 }
-function addLocalTracksToPeerConnection() {
+function addLocalTracksToPeerConnection(pc) {
   if (!localStream) return;
-  const senders = null;
-  const existingTrackIds = null;
-  localStream.getTracks().forEach();
+
+  const senders = pc.getSenders();
+  const existingTrackIds = senders
+    .filter((sender) => sender.track)
+    .map((sender) => sender.track.id);
+
+  localStream.getTracks().forEach((track) => {
+    if (!existingTrackIds.includes(track.id)) {
+      pc.addTrack(track, localStream);
+    }
+  });
 }
 function connectSignaling() {
   const myId = myIdInput.value.trim();
@@ -98,22 +106,59 @@ function connectSignaling() {
   }
   const wsUrl =
     "ws://localhost:9999/ws/signaling?user=" + encodeURIComponent(myId);
+
   ws = new WebSocket(wsUrl);
-  ws.onopen = function () {};
+  ws.onopen = function () {
+    log("Đã kết nối signaling server.");
+  };
   ws.onmessage = async function (event) {
     log("Nhận signal: " + event.data);
-    const msg = null;
-    const fromUser = null;
-    const type = null;
-    const data = null;
+
+    const msg = JSON.parse(event.data);
+
+    const fromUser = msg.from;
+    const type = msg.type;
+    const data = msg.data;
+
     currentTargetId = fromUser;
+
     if (type === "offer") {
       log("Nhận offer từ " + fromUser);
+      if (!localStream) {
+        await startCamera();
+      }
+
+      if (!peerConnection) {
+        peerConnection = createPeerConnection();
+      } else {
+        addLocalTracksToPeerConnection(peerConnection);
+      }
+
+      await peerConnection.setRemoteDescription(
+        new RTCSessionDescription(data),
+      );
+
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+
+      sendSignal(fromUser, "answer", peerConnection.localDescription);
       log("Đã gửi answer về " + fromUser);
     } else if (type === "answer") {
+      await peerConnection.setRemoteDescription(
+        new RTCSessionDescription(data),
+      );
       log("Nhận answer từ " + fromUser);
     } else if (type === "ice") {
       log("Nhận ICE từ " + fromUser);
+      if (data && data.candidate) {
+        try {
+          await peerConnection.addIceCandidate(
+            new RTCSessionDescription(data.candidate),
+          );
+        } catch (err) {
+          log("Lỗi xảy ra khi Add Candidate từ ICE" + err.message);
+        }
+      }
     }
   };
   ws.onerror = function (error) {
