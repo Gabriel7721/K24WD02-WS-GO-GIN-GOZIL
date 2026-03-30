@@ -16,8 +16,8 @@ type Controller struct {
 	UserRepo *user.Repository
 }
 
-func NewController(r *Repository) *Controller {
-	return &Controller{Repo: r}
+func NewController(r *Repository, ur *user.Repository) *Controller {
+	return &Controller{Repo: r, UserRepo: ur}
 }
 
 func (ctrl *Controller) SendRequest(c *gin.Context) {
