@@ -73,7 +73,7 @@ async function startCamera() {
       return;
     }
 
-    localStream = await avigator.mediaDevices.getUserMedia({
+    localStream = await navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true,
     });
